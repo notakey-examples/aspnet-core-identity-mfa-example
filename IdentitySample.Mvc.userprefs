@@ -1,0 +1,19 @@
+﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Data/Migrations/00000000000000_CreateIdentitySchema.Designer.cs">
+    <Files>
+      <File FileName="Controllers/AccountController.cs" Line="14" Column="2" />
+      <File FileName="Models/ApplicationDbContext.cs" Line="17" Column="70" />
+      <File FileName="Startup.cs" Line="7" Column="42" />
+      <File FileName="Data/Migrations/ApplicationDbContextModelSnapshot.cs" Line="20" Column="19" />
+      <File FileName="Data/Migrations/00000000000000_CreateIdentitySchema.cs" Line="92" Column="61" />
+      <File FileName="Data/Migrations/00000000000000_CreateIdentitySchema.Designer.cs" Line="21" Column="19" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.IdentitySample.Mvc PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
