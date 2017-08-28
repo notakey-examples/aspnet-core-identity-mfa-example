@@ -36,6 +36,20 @@ namespace IdentitySample
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				// Password settings
+				options.Password.RequireDigit = false;
+				options.Password.RequiredLength = 4;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+
+				// User settings
+				options.User.RequireUniqueEmail = false;
+			});
+
             services.AddMvc();
 
             // Add application services.
