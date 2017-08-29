@@ -1,18 +1,21 @@
 ﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="appsettings.json">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Services/NotakeySignInManager.cs">
     <Files>
-      <File FileName="Controllers/AccountController.cs" Line="14" Column="2" />
-      <File FileName="Models/ApplicationDbContext.cs" Line="17" Column="70" />
-      <File FileName="Startup.cs" Line="47" Column="59" />
-      <File FileName="Data/Migrations/ApplicationDbContextModelSnapshot.cs" Line="20" Column="68" />
-      <File FileName="Data/Migrations/00000000000000_CreateIdentitySchema.Designer.cs" Line="15" Column="39" />
-      <File FileName="Data/Migrations/00000000000000_CreateIdentitySchema.cs" Line="105" Column="47" />
-      <File FileName="appsettings.json" Line="2" Column="3" />
+      <File FileName="Controllers/AccountController.cs" Line="19" Column="26" />
+      <File FileName="../authy2fa-csharp-master/Authy2FA/Providers/AuthyOneTouchProvider.cs" Line="8" Column="29" />
+      <File FileName="../authy2fa-csharp-master/Authy2FA/Domain/Authy/OneTouchRequestValidator.cs" Line="33" Column="56" />
+      <File FileName="../authy2fa-csharp-master/Authy2FA/Domain/Authy/OneTouchClient.cs" Line="8" Column="1" />
+      <File FileName="Startup.cs" Line="39" Column="17" />
+      <File FileName="Models/ApplicationUser.cs" Line="5" Column="12" />
+      <File FileName="Program.cs" Line="17" Column="1" />
+      <File FileName="Services/NotakeySignInManager.cs" Line="27" Column="9" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/ingemars/Projects/aspnet-core-generic-mvc/Services/NotakeySigninManager.cs" relfile="Services/NotakeySigninManager.cs" line="53" column="25" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />

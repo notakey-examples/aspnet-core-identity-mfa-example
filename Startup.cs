@@ -3,6 +3,7 @@ using IdentitySample.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,9 +36,12 @@ namespace IdentitySample
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+                
+            // services.AddScoped<NotakeySigninManager>();
+            //services.AddScoped<SignInManager<ApplicationUser>>(() => new );
+			services.AddScoped<SignInManager<ApplicationUser>, NotakeySigninManager<ApplicationUser>>();
 
-
-			services.Configure<IdentityOptions>(options =>
+            services.Configure<IdentityOptions>(options =>
 			{
 				// Password settings
 				options.Password.RequireDigit = false;
@@ -60,6 +64,22 @@ namespace IdentitySample
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            //try
+            //{
+            //    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+            //        .CreateScope())
+            //    {
+
+            //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
+            //                         .Database.Migrate();
+
+            //        var userManager = app.ApplicationServices.GetService<UserManager<ApplicationUser>>();
+            //        var roleManager = app.ApplicationServices.GetService<RoleManager<IdentityRole>>();
+
+            //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>().EnsureSeedData(userManager, roleManager);
+            //    }
+            //}catch { }
+			
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
