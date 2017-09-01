@@ -63,10 +63,16 @@ namespace IdentitySample.Controllers
                     _logger.LogInformation(1, "User logged in.");
                     return RedirectToLocal(returnUrl);
                 }
+
                 if (result.RequiresTwoFactor)
                 {
-                    return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+                    _logger.LogInformation(1, "User requires 2FA.");
+                    return RedirectToAction(nameof(NtkAuthRequest), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 }
+
+                _logger.LogInformation(1, "User does not require 2FA.");
+
+
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning(2, "User account locked out.");
@@ -115,6 +121,8 @@ namespace IdentitySample.Controllers
                     //    "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>");
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(3, "User created a new account with password.");
+                    await _userManager.SetTwoFactorEnabledAsync(user, true);
+                    _logger.LogInformation(3, "2FA enabled for new user.");
                     return RedirectToLocal(returnUrl);
                 }
                 AddErrors(result);
@@ -355,6 +363,22 @@ namespace IdentitySample.Controllers
             var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
             return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
+
+		//
+		// GET: /Account/NtkAuthRequest
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<ActionResult> NtkAuthRequest(string returnUrl = null, bool rememberMe = false)
+		{
+			var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+			if (user == null)
+			{
+				return View("Error");
+			}
+			var userFactors = await _userManager.GetValidTwoFactorProvidersAsync(user);
+			var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
+			return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
+		}
 
         //
         // POST: /Account/SendCode

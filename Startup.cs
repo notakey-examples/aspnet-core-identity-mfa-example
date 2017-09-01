@@ -1,4 +1,5 @@
 using IdentitySample.Models;
+using IdentitySample.Mvc.Models.SeedDataModels;
 using IdentitySample.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,10 +37,11 @@ namespace IdentitySample
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-                
-            // services.AddScoped<NotakeySigninManager>();
-            //services.AddScoped<SignInManager<ApplicationUser>>(() => new );
-			services.AddScoped<SignInManager<ApplicationUser>, NotakeySigninManager<ApplicationUser>>();
+
+            // Before custom sign in manager 
+            services.Configure<NotakeyOptions>(options => Configuration.GetSection("Notakey").Bind(options));
+
+			services.AddScoped<SignInManager<ApplicationUser>, NotakeySignInManager<ApplicationUser>>();
 
             services.Configure<IdentityOptions>(options =>
 			{
@@ -64,21 +66,6 @@ namespace IdentitySample
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            //try
-            //{
-            //    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-            //        .CreateScope())
-            //    {
-
-            //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
-            //                         .Database.Migrate();
-
-            //        var userManager = app.ApplicationServices.GetService<UserManager<ApplicationUser>>();
-            //        var roleManager = app.ApplicationServices.GetService<RoleManager<IdentityRole>>();
-
-            //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>().EnsureSeedData(userManager, roleManager);
-            //    }
-            //}catch { }
 			
             if (env.IsDevelopment())
             {
@@ -94,12 +81,17 @@ namespace IdentitySample
 
             app.UseAuthentication();
 
+			
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            SampleUserDataModel.Initialize(app.ApplicationServices.GetService<UserManager<ApplicationUser>>());
         }
     }
+
+	
 }

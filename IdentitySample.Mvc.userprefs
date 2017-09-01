@@ -1,20 +1,20 @@
 ﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Services/NotakeySignInManager.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Models/AccountViewModels/VerifyAuthenticatorCodeViewModel.cs">
     <Files>
-      <File FileName="Controllers/AccountController.cs" Line="19" Column="26" />
-      <File FileName="../authy2fa-csharp-master/Authy2FA/Providers/AuthyOneTouchProvider.cs" Line="8" Column="29" />
-      <File FileName="../authy2fa-csharp-master/Authy2FA/Domain/Authy/OneTouchRequestValidator.cs" Line="33" Column="56" />
-      <File FileName="../authy2fa-csharp-master/Authy2FA/Domain/Authy/OneTouchClient.cs" Line="8" Column="1" />
-      <File FileName="Startup.cs" Line="39" Column="17" />
       <File FileName="Models/ApplicationUser.cs" Line="5" Column="12" />
-      <File FileName="Program.cs" Line="17" Column="1" />
-      <File FileName="Services/NotakeySignInManager.cs" Line="27" Column="9" />
+      <File FileName="Program.cs" Line="11" Column="44" />
+      <File FileName="Startup.cs" Line="61" Column="41" />
+      <File FileName="Controllers/AccountController.cs" Line="387" Column="49" />
+      <File FileName="Providers/NotakeyTokenProvider.cs" Line="32" Column="61" />
+      <File FileName="Models/SeedDataModels/SampleUserDataModel.cs" Line="23" Column="73" />
+      <File FileName="Models/AccountViewModels/VerifyAuthenticatorCodeViewModel.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/ingemars/Projects/aspnet-core-generic-mvc/Services/NotakeySigninManager.cs" relfile="Services/NotakeySigninManager.cs" line="53" column="25" />
+      <Breakpoint file="/Users/ingemars/Projects/aspnet-core-generic-mvc/Services/NotakeySignInManager.cs" relfile="Services/NotakeySignInManager.cs" line="138" column="1" />
+      <Breakpoint file="/Users/ingemars/Projects/aspnet-core-generic-mvc/Controllers/AccountController.cs" relfile="Controllers/AccountController.cs" line="67" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
