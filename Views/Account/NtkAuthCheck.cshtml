@@ -3,17 +3,73 @@
     ViewData["Title"] = "Notakey Auth request";
 }
 
+@section Scripts {
+    <script type="text/javascript">
+
+	    function AuthResponse(status){
+            switch(status) {
+                case 'pending':
+                    CallWaitForAuth();
+                    break;
+                case 'ok':
+                    $(location).attr('href', 'logon.aspx');
+                    break;
+                case 'reject':
+                    // redirect back to login form 
+                    $("#lblErrorMessage").html('Auth request rejected by user, click <a href="/Account/Login"> here </a> to try again.');
+                    break;
+                case 'timeout':
+                    // redirect back to login form 
+                    $("#lblErrorMessage").html('Auth request expired before approval, click <a href="/Account/Login"> here </a> to try again.');
+                    break;
+                default:
+                    // redirect back to login form 
+                    // unknown state
+                    $("#lblErrorMessage").html('Invalid auth state, please try again, click <a href="/Account/Login"> here </a> to try again.');
+                   
+                
+            }
+	    }
+	
+        function CallWaitForAuth() {
+	        var token = $('input[name="__RequestVerificationToken"]', $('#authState')).val();
+            var uuid = { Uuid: $("#uuid").val() };
+            var dataWithAntiforgeryToken = $.extend(uuid, { '__RequestVerificationToken': token });
+
+            $.ajax({
+                url: "/Account/NtkAuthState",
+                type: "POST",
+                data: dataWithAntiforgeryToken,
+                success: function (state) {
+                    AuthResponse(state.status);
+                    },
+                error: function () {
+                    $("#lblErrorMessage").html('Error occured during jQuery processing');
+                    }
+            });
+        }
+
+        $( document ).ready( CallWaitForAuth );
+	
+    </script>
+}
+
 <h2>@ViewData["Title"].</h2>
 
 <div class="row">
     <div class="col-md-8">
         Authentication request created. Please proceed on your mobile device. 
+		<div id="lblErrorMessage" />
     </div>
 	<div class="col-md-8">
         <img src="/loadingAnimation.gif" />
     </div>
 	<div class="col-md-8">
-		
-        <a asp-controller="Account" asp-action="NtkAuthCheck" asp-route-uuid="@Model.Uuid" asp-route-returnurl="@Model.ReturnUrl" asp-route-rememberme="@Model.RememberMe"> Check status </a>
+		<form asp-controller="Account" asp-action="NtkAuthState" id="authState" method="post">
+
+    		@Html.AntiForgeryToken()
+            <input type="hidden" value="@Model.Uuid" name="uuid" id="uuid"/>
+            <a asp-controller="Account" asp-action="NtkAuthCheck" asp-route-uuid="@Model.Uuid" asp-route-returnurl="@Model.ReturnUrl" asp-route-rememberme="@Model.RememberMe"> Check status </a>
+		</form>
     </div>
 </div>

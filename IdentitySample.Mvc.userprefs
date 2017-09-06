@@ -1,13 +1,17 @@
 ﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/AccountController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="../asp-net-demo-client/default.aspx.cs">
     <Files>
-      <File FileName="Controllers/AccountController.cs" Line="424" Column="65" />
-      <File FileName="Providers/NotakeyTokenProvider.cs" Line="133" Column="3" />
+      <File FileName="Controllers/AccountController.cs" Line="399" Column="48" />
+      <File FileName="Providers/NotakeyTokenProvider.cs" Line="9" Column="14" />
+      <File FileName="Views/Account/NtkAuthCheck.cshtml" Line="18" Column="33" />
+      <File FileName="../asp-net-demo-client/default.aspx.cs" Line="38" Column="13" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/ingemars/Projects/aspnet-core-generic-mvc/Providers/NotakeyTokenProvider.cs" relfile="Providers/NotakeyTokenProvider.cs" line="137" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />

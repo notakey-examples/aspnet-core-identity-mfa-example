@@ -123,6 +123,7 @@ namespace IdentitySample.Providers
 				.SingleAsync()
                 .Select(_ => new ApprovalRequestResponse())
                 .Concat(authSequence)
+                .FirstOrDefaultAsync()
                 .Select(item => {
                     return NotakeyAuthStateParser(item);
                     }).ToTask();
@@ -139,7 +140,7 @@ namespace IdentitySample.Providers
 
             if (!state.Pending){
                 authState.isProcessed = true;
-            }
+            }   
 
 			if (state.ApprovalGranted)
 			{

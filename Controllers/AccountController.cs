@@ -393,8 +393,9 @@ namespace IdentitySample.Controllers
 		}
 
 
-		[HttpGet]
+		[HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
 		public async Task<IActionResult> NtkAuthState(string Uuid)
 		{
 			var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(Uuid);
