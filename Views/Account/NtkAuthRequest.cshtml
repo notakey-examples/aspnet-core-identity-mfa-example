@@ -1,0 +1,19 @@
+﻿@model NtkAuthViewModel
+@{
+    ViewData["Title"] = "Notakey Auth request";
+}
+
+<h2>@ViewData["Title"].</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        Authentication request created. Please proceed on your mobile device. 
+    </div>
+	<div class="col-md-8">
+        <img src="/loadingAnimation.gif" />
+    </div>
+	<div class="col-md-8">
+        
+		<a asp-controller="Account" asp-action="NtkAuthCheck" asp-route-uuid="@Model.Uuid" asp-route-returnurl="@Model.ReturnUrl" asp-route-rememberme="@Model.RememberMe"> Check status </a>
+    </div>
+</div>

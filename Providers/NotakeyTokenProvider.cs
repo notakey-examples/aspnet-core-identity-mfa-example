@@ -1,15 +1,44 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Notakey.SDK;
+using System.Reactive;
+using Microsoft.Extensions.Logging;
+using System.Reactive.Linq;
+using Microsoft.Extensions.Options;
+using System.Reactive.Threading.Tasks;
+using IdentitySample.Models;
 
 namespace IdentitySample.Providers
 {
+
+
 	/// <summary>
-	/// Used for authenticator code verification.
+	/// Used for Notakey authenticator request verification.
 	/// </summary>
 	public class NotakeyTokenProvider<TUser> : IUserTwoFactorTokenProvider<TUser> where TUser : class
 	{
+
+		private ILogger<SignInManager<TUser>> _logger;
+		private readonly NotakeyOptions _ntkOpts;
+        private ManualResetEvent waitEvent;
+        private TUser loginUser;
+
+		public NotakeyTokenProvider(ILogger<SignInManager<TUser>> logger,
+									IOptions<NotakeyOptions> ntkOpts)
+		{
+
+			if (ntkOpts == null)
+				throw new ArgumentNullException(nameof(ntkOpts));
+
+
+			_ntkOpts = ntkOpts.Value;
+			_logger = logger;
+			waitEvent = new ManualResetEvent(false);
+		}
+
 		/// <summary>
 		/// Checks if a two factor authentication token can be generated for the specified <paramref name="user"/>.
 		/// </summary>
@@ -18,8 +47,11 @@ namespace IdentitySample.Providers
 		/// <returns>True if the user has an authenticator key set, otherwise false.</returns>
 		public async virtual Task<bool> CanGenerateTwoFactorTokenAsync(UserManager<TUser> manager, TUser user)
 		{
-			var key = await manager.GetAuthenticatorKeyAsync(user);
-			return !string.IsNullOrWhiteSpace(key);
+            // TODO: verify via API that user actually exists
+            // On the other hand, this causes 2FA to be skipped altogather
+
+            loginUser = user;
+			return true;
 		}
 
 		/// <summary>
@@ -31,7 +63,29 @@ namespace IdentitySample.Providers
 		/// <returns>string.Empty.</returns>
 		public virtual Task<string> GenerateAsync(string purpose, UserManager<TUser> manager, TUser user)
 		{
-			return Task.FromResult(string.Empty);
+
+            loginUser = user;
+
+			/**
+             * 1. The first task is to bind a SimpleApi instance to an API (endpoint + access_id combination)
+             * After the api instance is bound to the remote API, it can be used to perform other operations.
+             * 
+             * NOTE: before you are bound to an application, do not use any other functions!
+             */
+
+			var api = new SimpleApi();
+
+            var uuidSequence = Observable.Defer<string>(() => api.CreateAuthRequest(loginUser.ToString(), _ntkOpts.ActionTitle, "Example authentication request from .NET CORE 2.0", (int)_ntkOpts.MessageTtlSeconds));
+
+            var full = api
+                .Bind(_ntkOpts.ServiceURL, _ntkOpts.ServiceID)
+                .SingleAsync()
+                .Select(_ => "")
+                .Concat(uuidSequence);
+
+            //waitEvent.WaitOne();
+
+            return full.ToTask();
 		}
 
 		/// <summary>
@@ -44,26 +98,56 @@ namespace IdentitySample.Providers
 		/// <returns></returns>
 		public virtual async Task<bool> ValidateAsync(string purpose, string token, UserManager<TUser> manager, TUser user)
 		{
-			var key = await manager.GetAuthenticatorKeyAsync(user);
-			int code;
-			if (!int.TryParse(token, out code))
-			{
-				return false;
-			}
+            var authState = await TwoFactorNotakeyAuthState(token);
 
-			var hash = new HMACSHA1(Base32.FromBase32(key));
-			var unixTimestamp = Convert.ToInt64(Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds));
-			var timestep = Convert.ToInt64(unixTimestamp / 30);
-			// Allow codes from 90s in each direction (we could make this configurable?)
-			for (int i = -2; i <= 2; i++)
-			{
-				var expectedCode = Rfc6238AuthenticationService.ComputeTotp(hash, (ulong)(timestep + i), modifier: null);
-				if (expectedCode == code)
-				{
-					return true;
-				}
-			}
+            if(authState.isValid && authState.isApproved){
+                return true;
+            }
+
 			return false;
 		}
+
+		public virtual Task<NotakeyAuthState> TwoFactorNotakeyAuthState(string Uuid)
+        {
+            if (string.IsNullOrWhiteSpace(Uuid)){
+                throw new Exception("Invalid auth request UUID");
+            }
+
+
+			var api = new SimpleApi();
+
+            var authSequence = Observable.Defer<ApprovalRequestResponse>(() => api.CheckResponse(Uuid));
+
+			var full = api
+				.Bind(_ntkOpts.ServiceURL, _ntkOpts.ServiceID)
+				.SingleAsync()
+                .Select(_ => new ApprovalRequestResponse())
+                .Concat(authSequence)
+                .Select(item => {
+                    return NotakeyAuthStateParser(item);
+                    }).ToTask();
+
+            return full;
+          
+        }
+		
+        private NotakeyAuthState NotakeyAuthStateParser(ApprovalRequestResponse state)
+        {
+            var authState = (new NotakeyAuthState { isExpired = false, isProcessed = false, isValid = true, isApproved = false });
+
+            authState.isExpired = state.Expired;
+
+            if (!state.Pending){
+                authState.isProcessed = true;
+            }
+
+			if (state.ApprovalGranted)
+			{
+                authState.isApproved = true;
+			}
+
+
+            return authState;
+		}        
 	}
 }

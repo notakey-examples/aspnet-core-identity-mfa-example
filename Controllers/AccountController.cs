@@ -2,6 +2,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentitySample.Models;
+using IdentitySample.Providers;
 using IdentitySample.Models.AccountViewModels;
 using IdentitySample.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+
 
 namespace IdentitySample.Controllers
 {
@@ -20,19 +22,22 @@ namespace IdentitySample.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
+        private NotakeyTokenProvider<ApplicationUser> _ntkTokenApi; 
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ISmsSender smsSender,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            NotakeyTokenProvider<ApplicationUser> ntk)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _smsSender = smsSender;
             _logger = loggerFactory.CreateLogger<AccountController>();
+            _ntkTokenApi = ntk;
         }
 
         //
@@ -375,10 +380,69 @@ namespace IdentitySample.Controllers
 			{
 				return View("Error");
 			}
-			var userFactors = await _userManager.GetValidTwoFactorProvidersAsync(user);
-			var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
-			return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
+		
+			// Generate the token and send it
+			var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Notakey");
+			if (string.IsNullOrWhiteSpace(code))
+			{
+				return View("Error");
+			}
+			
+            return View(nameof(NtkAuthCheck), new NtkAuthCheckViewModel { Uuid = code, ReturnUrl = returnUrl, RememberMe = rememberMe });
 		}
+
+		//
+		// GET: /Account/NtkAuthCheck
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<IActionResult> NtkAuthCheck(NtkAuthCheckViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			// The following code protects for brute force attacks against the two factor codes.
+			// If a user enters incorrect codes for a specified amount of time then the user account
+			// will be locked out for a specified amount of time.
+            var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(model.Uuid);
+
+			if (!result.isValid)
+			{
+				ModelState.AddModelError(string.Empty, "Invalid auth request.");
+				return View(model);
+			}
+
+			if (result.isExpired)
+			{
+				ModelState.AddModelError(string.Empty, "Request has expired.");
+				return View(model);
+			}
+
+			if (result.isProcessed)
+			{
+				//ModelState.AddModelError(string.Empty, "Request has not yet been processed.");
+				//return View(model);
+                var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, false);
+				if (auth_result.Succeeded)
+				{
+					return RedirectToLocal(model.ReturnUrl);
+				}
+				if (auth_result.IsLockedOut)
+				{
+					_logger.LogWarning(7, "User account locked out.");
+					return View("Lockout");
+				}
+				else
+				{
+					ModelState.AddModelError(string.Empty, "Invalid code.");
+					return View(model);
+				}
+			}
+
+			return View(model);
+           	
+        }
 
         //
         // POST: /Account/SendCode

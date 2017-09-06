@@ -1,6 +1,7 @@
 using IdentitySample.Models;
 using IdentitySample.Mvc.Models.SeedDataModels;
 using IdentitySample.Services;
+using IdentitySample.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -36,7 +37,8 @@ namespace IdentitySample
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                //.AddDefaultTokenProviders()
+                .AddTokenProvider<NotakeyTokenProvider<ApplicationUser>>("Notakey");
 
             // Before custom sign in manager 
             services.Configure<NotakeyOptions>(options => Configuration.GetSection("Notakey").Bind(options));
