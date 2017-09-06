@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using IdentitySample.Models;
 using IdentitySample.Providers;
 using IdentitySample.Models.AccountViewModels;
@@ -388,14 +389,39 @@ namespace IdentitySample.Controllers
 				return View("Error");
 			}
 			
-            return View(nameof(NtkAuthCheck), new NtkAuthCheckViewModel { Uuid = code, ReturnUrl = returnUrl, RememberMe = rememberMe });
+            return View(nameof(NtkAuthCheck), new NtkAuthViewModel { Uuid = code, ReturnUrl = returnUrl, RememberMe = rememberMe });
+		}
+
+
+		[HttpGet]
+        [AllowAnonymous]
+		public async Task<IActionResult> NtkAuthState(string Uuid)
+		{
+			var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(Uuid);
+
+			if (!result.isValid)
+			{
+				return Json(new { status = "error" });
+			}
+
+			if (result.isExpired)
+			{
+				return Json(new { status = "timeout" });
+			}
+
+            if (result.isProcessed)
+            {
+                return Json(new { status = "ok" });
+            }	
+
+            return Json(new { status = "wait" });
 		}
 
 		//
 		// GET: /Account/NtkAuthCheck
 		[HttpGet]
 		[AllowAnonymous]
-		public async Task<IActionResult> NtkAuthCheck(NtkAuthCheckViewModel model)
+		public async Task<IActionResult> NtkAuthCheck(NtkAuthViewModel model)
 		{
 			if (!ModelState.IsValid)
 			{

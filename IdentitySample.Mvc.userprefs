@@ -1,17 +1,8 @@
 ﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Providers/NotakeyTokenProvider.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/AccountController.cs">
     <Files>
-      <File FileName="Models/ApplicationUser.cs" Line="10" Column="18" />
-      <File FileName="Program.cs" Line="11" Column="44" />
-      <File FileName="Controllers/AccountController.cs" Line="369" Column="46" />
-      <File FileName="Providers/NotakeyTokenProvider.cs" Line="129" Column="13" />
-      <File FileName="Views/Account/NtkAuthCheck.cshtml" Line="17" Column="3" />
-      <File FileName="Views/Account/NtkAuthRequest.cshtml" Line="20" Column="1" />
-      <File FileName="Views/Shared/_LoginPartial.cshtml" Line="5" Column="49" />
-      <File FileName="Views/Account/Login.cshtml" Line="49" Column="89" />
-      <File FileName="Views/Account/SendCode.cshtml" Line="9" Column="32" />
-      <File FileName="Models/AccountViewModels/NtkAuthViewModel.cs" Line="15" Column="31" />
-      <File FileName="Models/NotakeyAuthState.cs" Line="16" Column="31" />
+      <File FileName="Controllers/AccountController.cs" Line="424" Column="65" />
+      <File FileName="Providers/NotakeyTokenProvider.cs" Line="133" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
