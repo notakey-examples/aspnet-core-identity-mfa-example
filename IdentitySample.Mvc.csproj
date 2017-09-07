@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Identity sample MVC application on ASP.NET Core</Description>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <UserSecretsId>aspnetcore-b3d20cbe-418e-4bf2-a0f4-57f91d067e07</UserSecretsId>
   </PropertyGroup>
 
@@ -28,7 +28,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
-    <PackageReference Include="Notakey.SDK.Core.dll" Version="1.1.58" />
+    <!-- Notakey.SDK is Core-compatible. Adding NoWarn="..." until package specification reflects this -->
+    <PackageReference Include="Notakey.SDK" NoWarn="NU1701" Version="1.1.48" />
   </ItemGroup>
 
   <ItemGroup>
