@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-
+using System;
 
 namespace IdentitySample.Controllers
 {
@@ -374,22 +374,32 @@ namespace IdentitySample.Controllers
 		// GET: /Account/NtkAuthRequest
 		[HttpGet]
 		[AllowAnonymous]
-		public async Task<ActionResult> NtkAuthRequest(string returnUrl = null, bool rememberMe = false)
+		public async Task<ActionResult> NtkAuthRequest(string ReturnUrl = null, bool rememberMe = false)
 		{
+            // We need to identify the user to send auth request to 
 			var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 			if (user == null)
 			{
 				return View("Error");
 			}
-		
-			// Generate the token and send it
-			var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Notakey");
-			if (string.IsNullOrWhiteSpace(code))
-			{
-				return View("Error");
-			}
-			
-            return View(nameof(NtkAuthCheck), new NtkAuthViewModel { Uuid = code, ReturnUrl = returnUrl, RememberMe = rememberMe });
+
+            // Generate the token and send it for validation on user device
+            try
+            {
+                var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Notakey");
+
+                if (string.IsNullOrWhiteSpace(code))
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to create AuthRequest. API returned invalid value.");
+                    return View("Error");
+                }
+
+                return LocalRedirect("/Account/NtkAuthCheck?Uuid=" + code + "&ReturnUrl=" + ReturnUrl + "&RememberMe=" + rememberMe.ToString());
+
+            }catch (Exception e){
+                ModelState.AddModelError(string.Empty, "Failed to create AuthRequest. Error: "+e.Message);
+                return View("Error");
+            }
 		}
 
 
@@ -397,25 +407,32 @@ namespace IdentitySample.Controllers
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
 		public async Task<IActionResult> NtkAuthState(string Uuid)
-		{
-			var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(Uuid);
-
-			if (!result.isValid)
-			{
-				return Json(new { status = "error" });
-			}
-
-			if (result.isExpired)
-			{
-				return Json(new { status = "timeout" });
-			}
-
-            if (result.isProcessed)
+        {
+            try
             {
-                return Json(new { status = "ok" });
-            }	
+                var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(Uuid);
+				if (result.Expired)
+				{
+					return Json(new { status = "timeout" });
+				}
 
-            return Json(new { status = "wait" });
+				if (result.ApprovalRejected)
+				{
+					return Json(new { status = "reject" });
+				}
+
+				if (result.ApprovalGranted)
+				{
+					return Json(new { status = "ok" });
+				}
+
+				return Json(new { status = "pending" });
+			}
+			catch (Exception)
+			{
+                return Json(new { status = "error" });
+			}
+
 		}
 
 		//
@@ -429,45 +446,56 @@ namespace IdentitySample.Controllers
 				return View(model);
 			}
 
-			// The following code protects for brute force attacks against the two factor codes.
-			// If a user enters incorrect codes for a specified amount of time then the user account
-			// will be locked out for a specified amount of time.
-            var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(model.Uuid);
-
-			if (!result.isValid)
+			try
 			{
-				ModelState.AddModelError(string.Empty, "Invalid auth request.");
-				return View(model);
-			}
+                var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(model.Uuid);
 
-			if (result.isExpired)
-			{
-				ModelState.AddModelError(string.Empty, "Request has expired.");
-				return View(model);
-			}
-
-			if (result.isProcessed)
-			{
-				//ModelState.AddModelError(string.Empty, "Request has not yet been processed.");
-				//return View(model);
-                var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, false);
-				if (auth_result.Succeeded)
+				if (result.Expired)
 				{
-					return RedirectToLocal(model.ReturnUrl);
+					ModelState.AddModelError(string.Empty, "Request has expired.");
+					return View(model);
 				}
-				if (auth_result.IsLockedOut)
+
+				if (result.ApprovalRejected)
 				{
-					_logger.LogWarning(7, "User account locked out.");
-					return View("Lockout");
+					ModelState.AddModelError(string.Empty, "Request has been rejected.");
+					return View(model);
 				}
-				else
+
+				if (!result.ApprovalGranted)
 				{
-					ModelState.AddModelError(string.Empty, "Invalid code.");
 					return View(model);
 				}
 			}
+			catch (Exception e)
+			{
+                ModelState.AddModelError(string.Empty, "Invalid auth request. Error: "+e.Message);
+    			return View(model);
+			}
 
-			return View(model);
+			
+
+			// The following code protects for brute force attacks against the two factor codes.
+			// If a user enters incorrect codes for a specified amount of time then the user account
+			// will be locked out for a specified amount of time.
+
+			var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, model.RememberMe);
+
+			if (auth_result.Succeeded)
+			{
+				return RedirectToLocal(model.ReturnUrl);
+			}
+
+			if (auth_result.IsLockedOut)
+			{
+				_logger.LogWarning(7, "User account locked out.");
+				return View("Lockout");
+			}
+			else
+			{
+				ModelState.AddModelError(string.Empty, "Invalid code.");
+				return View(model);
+			}
            	
         }
 

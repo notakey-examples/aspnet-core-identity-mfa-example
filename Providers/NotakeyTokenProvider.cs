@@ -23,8 +23,6 @@ namespace IdentitySample.Providers
 
 		private ILogger<SignInManager<TUser>> _logger;
 		private readonly NotakeyOptions _ntkOpts;
-        private ManualResetEvent waitEvent;
-        private TUser loginUser;
 
 		public NotakeyTokenProvider(ILogger<SignInManager<TUser>> logger,
 									IOptions<NotakeyOptions> ntkOpts)
@@ -36,7 +34,7 @@ namespace IdentitySample.Providers
 
 			_ntkOpts = ntkOpts.Value;
 			_logger = logger;
-			waitEvent = new ManualResetEvent(false);
+			
 		}
 
 		/// <summary>
@@ -50,8 +48,7 @@ namespace IdentitySample.Providers
             // TODO: verify via API that user actually exists
             // On the other hand, this causes 2FA to be skipped altogather
 
-            loginUser = user;
-			return true;
+            return await Task.FromResult(true) ;
 		}
 
 		/// <summary>
@@ -63,9 +60,6 @@ namespace IdentitySample.Providers
 		/// <returns>string.Empty.</returns>
 		public virtual Task<string> GenerateAsync(string purpose, UserManager<TUser> manager, TUser user)
 		{
-
-            loginUser = user;
-
 			/**
              * 1. The first task is to bind a SimpleApi instance to an API (endpoint + access_id combination)
              * After the api instance is bound to the remote API, it can be used to perform other operations.
@@ -75,15 +69,13 @@ namespace IdentitySample.Providers
 
 			var api = new SimpleApi();
 
-            var uuidSequence = Observable.Defer<string>(() => api.CreateAuthRequest(loginUser.ToString(), _ntkOpts.ActionTitle, "Example authentication request from .NET CORE 2.0", (int)_ntkOpts.MessageTtlSeconds));
+            var uuidSequence = Observable.Defer<string>(() => api.CreateAuthRequest(user.ToString(), _ntkOpts.ActionTitle, "Example authentication request from .NET CORE 2.0", (int)_ntkOpts.MessageTtlSeconds));
 
             var full = api
                 .Bind(_ntkOpts.ServiceURL, _ntkOpts.ServiceID)
                 .SingleAsync()
                 .Select(_ => "")
                 .Concat(uuidSequence);
-
-            //waitEvent.WaitOne();
 
             return full.ToTask();
 		}
@@ -100,14 +92,14 @@ namespace IdentitySample.Providers
 		{
             var authState = await TwoFactorNotakeyAuthState(token);
 
-            if(authState.isValid && authState.isApproved){
+            if(!authState.Expired && authState.ApprovalGranted){
                 return true;
             }
 
 			return false;
 		}
 
-		public virtual Task<NotakeyAuthState> TwoFactorNotakeyAuthState(string Uuid)
+		public virtual Task<ApprovalRequestResponse> TwoFactorNotakeyAuthState(string Uuid)
         {
             if (string.IsNullOrWhiteSpace(Uuid)){
                 throw new Exception("Invalid auth request UUID");
@@ -118,37 +110,18 @@ namespace IdentitySample.Providers
 
             var authSequence = Observable.Defer<ApprovalRequestResponse>(() => api.CheckResponse(Uuid));
 
-			var full = api
-				.Bind(_ntkOpts.ServiceURL, _ntkOpts.ServiceID)
-				.SingleAsync()
+            var full = api
+                .Bind(_ntkOpts.ServiceURL, _ntkOpts.ServiceID)
+                .SingleAsync()
                 .Select(_ => new ApprovalRequestResponse())
                 .Concat(authSequence)
-                .FirstOrDefaultAsync()
-                .Select(item => {
-                    return NotakeyAuthStateParser(item);
-                    }).ToTask();
+                .LastAsync();
 
-            return full;
+
+            return full.ToTask();
           
         }
 		
-        private NotakeyAuthState NotakeyAuthStateParser(ApprovalRequestResponse state)
-        {
-            var authState = (new NotakeyAuthState { isExpired = false, isProcessed = false, isValid = true, isApproved = false });
-
-            authState.isExpired = state.Expired;
-
-            if (!state.Pending){
-                authState.isProcessed = true;
-            }   
-
-			if (state.ApprovalGranted)
-			{
-                authState.isApproved = true;
-			}
-
-
-            return authState;
-		}        
+  
 	}
 }

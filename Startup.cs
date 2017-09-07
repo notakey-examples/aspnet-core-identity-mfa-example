@@ -37,13 +37,12 @@ namespace IdentitySample
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                // We are not using standard providers 
                 //.AddDefaultTokenProviders()
                 .AddTokenProvider<NotakeyTokenProvider<ApplicationUser>>("Notakey");
 
             // Before custom sign in manager 
             services.Configure<NotakeyOptions>(options => Configuration.GetSection("Notakey").Bind(options));
-
-			services.AddScoped<SignInManager<ApplicationUser>, NotakeySignInManager<ApplicationUser>>();
 
             services.Configure<IdentityOptions>(options =>
 			{

@@ -12,20 +12,23 @@
                     CallWaitForAuth();
                     break;
                 case 'ok':
-                    $(location).attr('href', 'logon.aspx');
+                    location.reload();
                     break;
                 case 'reject':
                     // redirect back to login form 
                     $("#lblErrorMessage").html('Auth request rejected by user, click <a href="/Account/Login"> here </a> to try again.');
+	                $('#imgProgressIndication').hide(); 
                     break;
                 case 'timeout':
                     // redirect back to login form 
                     $("#lblErrorMessage").html('Auth request expired before approval, click <a href="/Account/Login"> here </a> to try again.');
+	                $('#imgProgressIndication').hide(); 
                     break;
                 default:
                     // redirect back to login form 
                     // unknown state
                     $("#lblErrorMessage").html('Invalid auth state, please try again, click <a href="/Account/Login"> here </a> to try again.');
+	                $('#imgProgressIndication').hide(); 
                    
                 
             }
@@ -59,17 +62,16 @@
 <div class="row">
     <div class="col-md-8">
         Authentication request created. Please proceed on your mobile device. 
-		<div id="lblErrorMessage" />
+		
     </div>
 	<div class="col-md-8">
-        <img src="/loadingAnimation.gif" />
+        <img id="imgProgressIndication" src="/loadingAnimation.gif" />
+		<div id="lblErrorMessage"></div>
     </div>
 	<div class="col-md-8">
 		<form asp-controller="Account" asp-action="NtkAuthState" id="authState" method="post">
-
     		@Html.AntiForgeryToken()
             <input type="hidden" value="@Model.Uuid" name="uuid" id="uuid"/>
-            <a asp-controller="Account" asp-action="NtkAuthCheck" asp-route-uuid="@Model.Uuid" asp-route-returnurl="@Model.ReturnUrl" asp-route-rememberme="@Model.RememberMe"> Check status </a>
 		</form>
     </div>
 </div>
