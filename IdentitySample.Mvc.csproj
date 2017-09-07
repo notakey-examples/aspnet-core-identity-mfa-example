@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
-    <PackageReference Include="Notakey.SDK.Core.dll" Version="1.1.53" />
+    <PackageReference Include="Notakey.SDK.Core.dll" Version="1.1.58" />
   </ItemGroup>
 
   <ItemGroup>

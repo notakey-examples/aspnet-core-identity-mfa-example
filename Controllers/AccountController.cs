@@ -411,17 +411,21 @@ namespace IdentitySample.Controllers
             try
             {
                 var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(Uuid);
+
+				// The AuthRequest has expired
+                // Timeout value can be adjusted in appsettings.json in project root
 				if (result.Expired)
 				{
 					return Json(new { status = "timeout" });
 				}
 
-				if (result.ApprovalRejected)
-				{
-					return Json(new { status = "reject" });
-				}
+				//if (result.ApprovalRejected)
+				//{
+				//	return Json(new { status = "reject" });
+				//}
 
-				if (result.ApprovalGranted)
+                // A response has arrived from user for AuthRequest
+				if (!result.Pending)
 				{
 					return Json(new { status = "ok" });
 				}
@@ -456,16 +460,11 @@ namespace IdentitySample.Controllers
 					return View(model);
 				}
 
-				if (result.ApprovalRejected)
+				if (result.Pending)
 				{
-					ModelState.AddModelError(string.Empty, "Request has been rejected.");
 					return View(model);
 				}
 
-				if (!result.ApprovalGranted)
-				{
-					return View(model);
-				}
 			}
 			catch (Exception e)
 			{
@@ -481,22 +480,21 @@ namespace IdentitySample.Controllers
 
 			var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, model.RememberMe);
 
-			if (auth_result.Succeeded)
-			{
-				return RedirectToLocal(model.ReturnUrl);
-			}
-
+		    
 			if (auth_result.IsLockedOut)
 			{
 				_logger.LogWarning(7, "User account locked out.");
 				return View("Lockout");
 			}
-			else
+
+			if (auth_result.Succeeded)
 			{
-				ModelState.AddModelError(string.Empty, "Invalid code.");
-				return View(model);
+				return RedirectToLocal(model.ReturnUrl);
 			}
-           	
+
+			ModelState.AddModelError(string.Empty, "Invalid code.");
+			return View("NtkFailed");
+			
         }
 
         //
