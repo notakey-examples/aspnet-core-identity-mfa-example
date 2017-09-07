@@ -1,12 +1,13 @@
 ﻿<Properties StartupConfiguration="{7691A7D5-B00E-4B3A-B599-FA8B3FE74050}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/AccountController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Models/SeedDataModels/SampleUserDataModel.cs">
     <Files>
-      <File FileName="Controllers/AccountController.cs" Line="402" Column="10" />
+      <File FileName="Controllers/AccountController.cs" Line="471" Column="5" />
       <File FileName="Providers/NotakeyTokenProvider.cs" Line="102" Column="46" />
       <File FileName="Views/Account/NtkAuthCheck.cshtml" Line="44" Column="30" />
       <File FileName="../sdk-csharp/src/Internal Models/Application.cs" Line="6" Column="1" />
-      <File FileName="Startup.cs" Line="40" Column="55" />
+      <File FileName="Startup.cs" Line="93" Column="24" />
       <File FileName="../sdk-csharp/src/SimpleApi.cs" Line="196" Column="45" />
+      <File FileName="Models/SeedDataModels/SampleUserDataModel.cs" Line="24" Column="14" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
