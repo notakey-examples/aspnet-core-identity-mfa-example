@@ -2,7 +2,7 @@
 
 Project showcasing Microsoft.AspNetCore.Identity 2FA integration possibilities. 
 
-Install .NET Core from here version >= 2.0 [Download .NET Core](https://www.microsoft.com/net/download/core).
+Install .NET Core from [here](https://www.microsoft.com/net/download/core), version >= 2.0.
 
 Original project from official ASP.NET Core Identity project can be found [here](https://github.com/aspnet/Identity/tree/dev/samples/IdentitySample.Mvc). 
 
