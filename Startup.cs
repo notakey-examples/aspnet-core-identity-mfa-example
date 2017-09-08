@@ -90,6 +90,7 @@ namespace IdentitySample
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            // Demo users are created here
             SampleUserDataModel.Initialize(app.ApplicationServices.GetService<UserManager<ApplicationUser>>());
         }
     }

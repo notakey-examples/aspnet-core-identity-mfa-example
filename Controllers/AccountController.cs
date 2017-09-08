@@ -378,14 +378,18 @@ namespace IdentitySample.Controllers
 		{
             // We need to identify the user to send auth request to 
 			var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            // User has not passed password athentication
 			if (user == null)
-			{
+            {
 				return View("Error");
 			}
 
             // Generate the token and send it for validation on user device
             try
             {
+                // We generate AuthRequest and get UUID that we are presenting to Identity framework 
+                // as 2FA code, to integrate in native validation methods
                 var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Notakey");
 
                 if (string.IsNullOrWhiteSpace(code))
@@ -397,7 +401,7 @@ namespace IdentitySample.Controllers
                 return LocalRedirect("/Account/NtkAuthCheck?Uuid=" + code + "&ReturnUrl=" + ReturnUrl + "&RememberMe=" + rememberMe.ToString());
 
             }catch (Exception e){
-                ModelState.AddModelError(string.Empty, "Failed to create AuthRequest. Error: "+e.Message);
+                ModelState.AddModelError(string.Empty, "Failed to create AuthRequest. Error: " + e.Message);
                 return View("Error");
             }
 		}
@@ -419,17 +423,22 @@ namespace IdentitySample.Controllers
 					return Json(new { status = "timeout" });
 				}
 
+
+				// We are validating also rejected tokens with TwoFactorSignInAsync
+                // to enforce full authentication workflow (e.g. evaluating lockout thresholds) 
+
 				//if (result.ApprovalRejected)
 				//{
 				//	return Json(new { status = "reject" });
 				//}
 
-                // A response has arrived from user for AuthRequest
+				// A response has arrived from user for AuthRequest
 				if (!result.Pending)
 				{
 					return Json(new { status = "ok" });
 				}
 
+                // No progress yet on user's mobile device
 				return Json(new { status = "pending" });
 			}
 			catch (Exception)
@@ -452,14 +461,19 @@ namespace IdentitySample.Controllers
 
 			try
 			{
-                var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(model.Uuid);
+				// Before actual call to TwoFactorSignInAsync we need to make sure 
+                // the AuthRequest has been processed by user
+				var result = await _ntkTokenApi.TwoFactorNotakeyAuthState(model.Uuid);
 
+				// User failed to respond in timely manner, we show error message
 				if (result.Expired)
 				{
 					ModelState.AddModelError(string.Empty, "Request has expired.");
 					return View(model);
 				}
 
+				// If request is not processed we just show the progress indication
+				// and background check using NtkAuthState call above
 				if (result.Pending)
 				{
 					return View(model);
@@ -478,7 +492,10 @@ namespace IdentitySample.Controllers
 			// If a user enters incorrect codes for a specified amount of time then the user account
 			// will be locked out for a specified amount of time.
 
-			var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, model.RememberMe);
+
+            // rememberClient attribute allows to skip 2FA for subsequent logins for 30 days by default
+            // We are disabling this to showcase the Notakey requirement every time
+			var auth_result = await _signInManager.TwoFactorSignInAsync("Notakey", model.Uuid, model.RememberMe, false);
 
 		    
 			if (auth_result.IsLockedOut)

@@ -46,13 +46,13 @@ namespace IdentitySample.Providers
 		public async virtual Task<bool> CanGenerateTwoFactorTokenAsync(UserManager<TUser> manager, TUser user)
 		{
             // TODO: verify via API that user actually exists
-            // On the other hand, this causes 2FA to be skipped altogather
+            // On the other hand, this causes 2FA to be skipped altogather if we return false
 
             return await Task.FromResult(true) ;
 		}
 
 		/// <summary>
-		/// Returns an empty string since no authenticator codes are sent.
+		/// Returns token that identifies autentication request sent to mobile device user
 		/// </summary>
 		/// <param name="purpose">Ignored.</param>
 		/// <param name="manager">The <see cref="UserManager{TUser}"/> to retrieve the <paramref name="user"/> from.</param>
@@ -81,7 +81,7 @@ namespace IdentitySample.Providers
 		}
 
 		/// <summary>
-		/// 
+		/// Native method for 2FA token validation
 		/// </summary>
 		/// <param name="purpose"></param>
 		/// <param name="token"></param>
@@ -99,6 +99,17 @@ namespace IdentitySample.Providers
 			return false;
 		}
 
+
+		/// <summary>
+		/// Checks if authentication request is valid and returns request state - Approved, Rejected, Pending
+		/// When Pending == false, authentication flow can proceed. 
+		/// ResponsePayloadBase64 field in response contains payload with signature from mobile device
+        /// You can re-validate signature in XML payload with standard PKI toolset (validation is already done in NAS)
+        /// Fingerprint element in XML can be used to track actual device, if user has multiple
+		/// Model ApprovalRequestResponse comes from Notakey.SDK API 
+		/// </summary>
+		/// <param name="Uuid"></param>
+		/// <returns></returns>
 		public virtual Task<ApprovalRequestResponse> TwoFactorNotakeyAuthState(string Uuid)
         {
             if (string.IsNullOrWhiteSpace(Uuid)){
