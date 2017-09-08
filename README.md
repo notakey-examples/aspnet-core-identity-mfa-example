@@ -29,7 +29,7 @@ For testing, we have provided a default (shared) environment:
 
 - service domain demo.notakey.com
 - application .NET SDK Demo (with AccessId 235879a9-a3f3-42b4-b13a-4836d0fd3bf8)
-- user 'demo@example.com' with password 'asdllkj' 
+- user 'demo@example.com' with password 'asdlkj' 
 
 After onboarding this user in the Notakey Authenticator mobile application, and running this demo, you should
 receive authentication requests. Add service domain demo.notakey.com in Notakey Authenticator mobile application 
