@@ -41,7 +41,7 @@ namespace IdentitySample
                 //.AddDefaultTokenProviders()
                 .AddTokenProvider<NotakeyTokenProvider<ApplicationUser>>("Notakey");
 
-            // Before custom sign in manager 
+            // Load API settings from appsettings.json 
             services.Configure<NotakeyOptions>(options => Configuration.GetSection("Notakey").Bind(options));
 
             services.Configure<IdentityOptions>(options =>
